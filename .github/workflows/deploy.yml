@@ -44,6 +44,10 @@ jobs:
         run: |
           python scripts/build_static.py
 
+      - name: Verify static build and Python manifest
+        run: |
+          python -c "import json, pathlib, sys; p = pathlib.Path('dist/py/manifest.json'); sys.exit('dist/py/manifest.json missing') if not p.exists() else None; m = json.loads(p.read_text()); missing = [f for f in m.get('files', []) if not (pathlib.Path('dist/py') / f).exists()]; sys.exit(f'Missing manifest files: {missing}') if missing else print(f'Verified {len(m.get(\"files\", []))} files in dist/py/manifest.json.')"
+
       - name: Configure GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v5

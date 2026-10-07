@@ -119,9 +119,37 @@ def build_static(project_root: Optional[Path] = None) -> Path:
     nojekyll_path.write_text("", encoding="utf-8")
     print("Created dist/.nojekyll.")
 
+    # 6. Verify manifest and all listed files exist
+    if not manifest_json_path.exists():
+        print(f"FATAL: Manifest file does not exist: {manifest_json_path}", file=sys.stderr)
+        sys.exit(1)
+
+    with open(manifest_json_path, "r", encoding="utf-8") as f:
+        verified_manifest = json.load(f)
+
+    listed_files = verified_manifest.get("files", [])
+    if not listed_files:
+        print("FATAL: Manifest file contains no files!", file=sys.stderr)
+        sys.exit(1)
+
+    missing_files = []
+    for rel_path in listed_files:
+        expected_path = dist_py / rel_path
+        if not expected_path.exists():
+            missing_files.append(rel_path)
+
+    if missing_files:
+        print(f"FATAL: Manifest lists missing files: {missing_files}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Verified {len(listed_files)} Python files in manifest all exist.")
     print(f"\nStatic build complete! Output ready at: {dist_dir}")
     return dist_dir
 
 
 if __name__ == "__main__":
-    build_static()
+    try:
+        build_static()
+    except Exception as exc:
+        print(f"Build failed with exception: {exc}", file=sys.stderr)
+        sys.exit(1)

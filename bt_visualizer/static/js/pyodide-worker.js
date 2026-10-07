@@ -43,7 +43,7 @@ function ensureDir(fs, filePath) {
   }
 }
 
-async function initPyodideWorker(baseUrl = '') {
+async function initPyodideWorker(baseUrl = '', version = '') {
   postMessage({ type: 'progress', message: 'Loading Python engine from CDN...', percent: 15 });
 
   // Import Pyodide script
@@ -56,10 +56,27 @@ async function initPyodideWorker(baseUrl = '') {
 
   postMessage({ type: 'progress', message: 'Fetching Python module manifest...', percent: 55 });
 
-  const manifestUrl = (baseUrl ? baseUrl.replace(/\/+$/, '') + '/' : '') + 'py/manifest.json';
-  const manifestRes = await fetchWithCache(manifestUrl);
+  // Resolve robust base URL
+  let cleanBase = baseUrl;
+  if (!cleanBase) {
+    try {
+      cleanBase = new URL('../', self.location.href).href;
+    } catch (e) {
+      cleanBase = self.location.origin + '/';
+    }
+  }
+  if (!cleanBase.endsWith('/')) {
+    cleanBase += '/';
+  }
+
+  const manifestUrl = new URL('py/manifest.json', cleanBase);
+  if (version) {
+    manifestUrl.searchParams.set('v', version);
+  }
+
+  const manifestRes = await fetchWithCache(manifestUrl.href);
   if (!manifestRes.ok) {
-    throw new Error(`Failed to load manifest from ${manifestUrl} (HTTP ${manifestRes.status})`);
+    throw new Error(`Failed to load manifest from ${manifestUrl.href} (HTTP ${manifestRes.status})`);
   }
   const manifest = await manifestRes.json();
   const files = manifest.files || [];
@@ -69,10 +86,13 @@ async function initPyodideWorker(baseUrl = '') {
   const totalFiles = files.length;
   for (let i = 0; i < totalFiles; i++) {
     const relPath = files[i];
-    const fileUrl = (baseUrl ? baseUrl.replace(/\/+$/, '') + '/' : '') + 'py/' + relPath;
-    const fileRes = await fetchWithCache(fileUrl);
+    const fileUrl = new URL('py/' + relPath, cleanBase);
+    if (version) {
+      fileUrl.searchParams.set('v', version);
+    }
+    const fileRes = await fetchWithCache(fileUrl.href);
     if (!fileRes.ok) {
-      throw new Error(`Failed to fetch Python module ${relPath} (HTTP ${fileRes.status})`);
+      throw new Error(`Failed to fetch Python module ${relPath} from ${fileUrl.href} (HTTP ${fileRes.status})`);
     }
     const code = await fileRes.text();
 
@@ -119,7 +139,7 @@ self.onmessage = async (e) => {
 
   if (data.type === 'init') {
     try {
-      await initPyodideWorker(data.baseUrl || '');
+      await initPyodideWorker(data.baseUrl || '', data.version || '');
       postMessage({ type: 'ready' });
     } catch (err) {
       postMessage({

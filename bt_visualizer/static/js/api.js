@@ -109,6 +109,19 @@ const Api = {
     }
   },
 
+  getBaseUrl() {
+    let base = document.baseURI || window.location.href;
+    base = base.split('#')[0].split('?')[0];
+    if (!base.endsWith('/')) {
+      if (base.endsWith('.html') || base.endsWith('.htm')) {
+        base = base.substring(0, base.lastIndexOf('/') + 1);
+      } else {
+        base = base + '/';
+      }
+    }
+    return base;
+  },
+
   async _initPyodide() {
     this.mode = 'pyodide';
     this._updateUiModeBadge('Pyodide (In-Browser)');
@@ -116,8 +129,9 @@ const Api = {
 
     return new Promise((resolve, reject) => {
       try {
-        const workerPath = 'js/pyodide-worker.js';
-        this.worker = new Worker(workerPath);
+        const baseUrl = this.getBaseUrl();
+        const workerUrl = new URL('js/pyodide-worker.js', baseUrl).href;
+        this.worker = new Worker(workerUrl);
 
         this.worker.onmessage = (e) => {
           const data = e.data;
@@ -157,7 +171,8 @@ const Api = {
           reject(err);
         };
 
-        this.worker.postMessage({ type: 'init', baseUrl: '' });
+        const buildId = '1.0.1-' + Date.now();
+        this.worker.postMessage({ type: 'init', baseUrl, version: buildId });
       } catch (err) {
         this._showError(err.message || 'Worker creation failed');
         reject(err);
