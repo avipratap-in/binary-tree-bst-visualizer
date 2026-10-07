@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Step &amp; Player Test</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .dev-controls {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 20;
+      background: var(--bg-panel);
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .kbd-shortcut {
+      background: var(--bg-panel-alt);
+      border: 1px solid var(--border-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- Dev Switcher Controls -->
+  <div class="dev-controls">
+    <button class="btn-ctrl" id="btnLoadMulti" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Multi-Step (Search 15)</button>
+    <button class="btn-ctrl" id="btnLoadTraversal" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Multi-Step (Inorder)</button>
+    <button class="btn-ctrl" id="btnLoadSingle" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Edge: 1 Step</button>
+    <button class="btn-ctrl" id="btnLoadEmpty" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Edge: 0 Steps</button>
+    <button class="btn-ctrl" id="btnThemeToggle" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Theme</button>
+    <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 6px;">
+      Keys: <span class="kbd-shortcut">Space</span> play/pause &bull; <span class="kbd-shortcut">&larr;</span> back &bull; <span class="kbd-shortcut">&rarr;</span> forward
+    </span>
+  </div>
+
+  <!-- Top Bar -->
+  <header class="top-bar" style="padding-left: 640px;">
+    <div class="brand-section">
+      <span class="brand-icon">&#127795;</span>
+      <span class="brand-title">Dev Player &amp; Animation Test</span>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace">
+    <section class="canvas-container">
+      <div class="tree-stats-badge" id="statsBadge">N=0, h=0</div>
+
+      <svg id="treeCanvas" class="svg-viewport" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet">
+        <g id="edgesLayer"></g>
+        <g id="nodesLayer"></g>
+      </svg>
+
+      <!-- Bottom-Right Floating Panels -->
+      <div class="bottom-right-container">
+        <!-- Yellow Status Message Box -->
+        <div class="status-box" id="statusBox">Ready.</div>
+
+        <!-- Pink Pseudocode Box -->
+        <div class="pseudocode-panel" id="pseudoPanel">
+          <div class="pseudo-title">Pseudocode</div>
+          <ol class="pseudo-lines" id="pseudoList"></ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Player Bar (Full Functional UI) -->
+  <footer class="player-bar" id="playerBar">
+    <div class="player-controls">
+      <button id="btnSkipStart" class="btn-ctrl" title="Skip to Start (Home)">&#9198;</button>
+      <button id="btnStepBack" class="btn-ctrl" title="Step Back (&larr;)">&#9194;</button>
+      <button id="btnPlay" class="btn-ctrl btn-play" title="Play (Space)">&#9654;</button>
+      <button id="btnStepForward" class="btn-ctrl" title="Step Forward (&rarr;)">&#9193;</button>
+      <button id="btnSkipEnd" class="btn-ctrl" title="Skip to End (End)">&#9197;</button>
+    </div>
+
+    <div class="player-progress-container">
+      <input type="range" id="progressSlider" class="scrubber-slider" min="0" max="0" value="0" step="1" aria-label="Progress">
+      <span class="step-label" id="stepCounter">0 / 0</span>
+    </div>
+
+    <div class="player-speed-container">
+      <label for="speedSelect">Speed</label>
+      <select id="speedSelect" class="speed-select" aria-label="Playback Speed">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="1.0" selected>1.0x</option>
+        <option value="2.0">2.0x</option>
+        <option value="4.0">4.0x</option>
+      </select>
+    </div>
+  </footer>
+
+  <script src="js/renderer.js"></script>
+  <script src="js/player.js"></script>
+  <script>
+    // Sample Data 1: Search for 15 in BST (7 steps)
+    const treeState = {
+      id: "n_10", value: 10, freq: 1,
+      left: {
+        id: "n_5", value: 5, freq: 1,
+        left: { id: "n_2", value: 2, freq: 1, left: null, right: null },
+        right: { id: "n_7", value: 7, freq: 1, left: null, right: null }
+      },
+      right: {
+        id: "n_15", value: 15, freq: 2,
+        left: { id: "n_12", value: 12, freq: 1, left: null, right: null },
+        right: { id: "n_20", value: 20, freq: 1, left: null, right: null }
+      }
+    };
+
+    const multiSearchTimeline = {
+      operation: "search",
+      pseudocode: [
+        "if root is null: return not found",
+        "if v == curr.val: return found",
+        "if v < curr.val: search left subtree",
+        "else: search right subtree"
+      ],
+      steps: [
+        {
+          tree: treeState,
+          highlight_nodes: ["n_10"],
+          highlight_edges: [],
+          visited: [],
+          message: "Step 1: Start search at root (10). Comparing target 15 with 10.",
+          pseudo_line: 3,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_15"],
+          highlight_edges: [["n_10", "n_15"]],
+          visited: [10],
+          message: "Step 2: 15 > 10, moving to right child (15).",
+          pseudo_line: 3,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_15"],
+          highlight_edges: [["n_10", "n_15"]],
+          visited: [10],
+          message: "Step 3: Comparing target 15 with current node 15: Target MATCHED!",
+          pseudo_line: 1,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_15"],
+          highlight_edges: [],
+          visited: [10, 15],
+          message: "Step 4: Target 15 found with duplicate frequency = 2 (15-2). Search complete.",
+          pseudo_line: 1,
+          stats: { n: 7, h: 3 }
+        }
+      ]
+    };
+
+    // Sample Data 2: Inorder Traversal (7 steps)
+    const traversalTimeline = {
+      operation: "inorder",
+      pseudocode: [
+        "if curr is null: return",
+        "traverse left subtree",
+        "visit curr node (append to visited)",
+        "traverse right subtree"
+      ],
+      steps: [
+        {
+          tree: treeState,
+          highlight_nodes: ["n_2"],
+          highlight_edges: [],
+          visited: [2],
+          message: "Visiting leftmost leaf 2.",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_5"],
+          highlight_edges: [["n_5", "n_2"]],
+          visited: [2, 5],
+          message: "Visiting node 5.",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_7"],
+          highlight_edges: [["n_5", "n_7"]],
+          visited: [2, 5, 7],
+          message: "Visiting node 7.",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_10"],
+          highlight_edges: [],
+          visited: [2, 5, 7, 10],
+          message: "Visiting root 10.",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_12"],
+          highlight_edges: [],
+          visited: [2, 5, 7, 10, 12],
+          message: "Visiting node 12.",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_15"],
+          highlight_edges: [],
+          visited: [2, 5, 7, 10, 12, 15],
+          message: "Visiting node 15 (freq 2).",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        },
+        {
+          tree: treeState,
+          highlight_nodes: ["n_20"],
+          highlight_edges: [],
+          visited: [2, 5, 7, 10, 12, 15, 20],
+          message: "Visiting node 20. Inorder traversal complete!",
+          pseudo_line: 2,
+          stats: { n: 7, h: 3 }
+        }
+      ]
+    };
+
+    // Single Step Edge Case
+    const singleStepTimeline = {
+      operation: "single_node",
+      pseudocode: ["single step demonstration"],
+      steps: [
+        {
+          tree: { id: "n_42", value: 42, freq: 1, left: null, right: null },
+          highlight_nodes: ["n_42"],
+          highlight_edges: [],
+          visited: [42],
+          message: "Single node tree (edge case).",
+          pseudo_line: 0,
+          stats: { n: 1, h: 1 }
+        }
+      ]
+    };
+
+    // Empty Step Edge Case
+    const emptyStepTimeline = {
+      operation: "empty",
+      pseudocode: ["empty tree"],
+      steps: []
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Renderer.init('treeCanvas');
+      window.PlayerInstance = new Player();
+      window.PlayerInstance.loadTimeline(multiSearchTimeline);
+
+      document.getElementById('btnLoadMulti').addEventListener('click', () => {
+        window.PlayerInstance.loadTimeline(multiSearchTimeline);
+      });
+
+      document.getElementById('btnLoadTraversal').addEventListener('click', () => {
+        window.PlayerInstance.loadTimeline(traversalTimeline);
+      });
+
+      document.getElementById('btnLoadSingle').addEventListener('click', () => {
+        window.PlayerInstance.loadTimeline(singleStepTimeline);
+      });
+
+      document.getElementById('btnLoadEmpty').addEventListener('click', () => {
+        window.PlayerInstance.loadTimeline(emptyStepTimeline);
+      });
+
+      document.getElementById('btnThemeToggle').addEventListener('click', () => {
+        const doc = document.documentElement;
+        const cur = doc.getAttribute('data-theme') || 'dark';
+        doc.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+      });
+    });
+  </script>
+</body>
+</html>
