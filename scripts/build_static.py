@@ -33,7 +33,27 @@ def build_static(project_root: Optional[Path] = None) -> Path:
 
     # 1. Clean previous dist/ directory
     if dist_dir.exists():
-        shutil.rmtree(dist_dir)
+        def _remove_readonly(func, path, exc_info):
+            import stat
+            import os
+            try:
+                os.chmod(path, stat.S_IWRITE)
+                func(path)
+            except Exception:
+                pass
+
+        if sys.version_info >= (3, 12):
+            def _onexc(func, path, exc):
+                import stat
+                import os
+                try:
+                    os.chmod(path, stat.S_IWRITE)
+                    func(path)
+                except Exception:
+                    pass
+            shutil.rmtree(dist_dir, onexc=_onexc)
+        else:
+            shutil.rmtree(dist_dir, onerror=_remove_readonly)
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # 2. Copy static folder to dist/
