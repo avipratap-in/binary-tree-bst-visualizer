@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Tree &amp; BST Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rouge+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <span class="brand-icon">&#127795;</span>
+      <span class="brand-title">Binary Tree &amp; BST Visualizer</span>
+      <span id="engineBadge" class="engine-badge" title="Active Engine">Initializing...</span>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" id="navTabs">
+      <button class="tab-btn" data-tab="binary">Binary Tree</button>
+      <button class="tab-btn active" data-tab="bst">BST</button>
+      <button class="tab-btn" data-tab="build">Build from Traversal</button>
+    </nav>
+
+    <!-- Top Utilities: Undo, Clear, Export, Share, Theme -->
+    <div class="top-actions">
+      <button class="btn-utility" id="btnUndo" title="Undo Last Operation (Ctrl+Z)">&#8617; Undo</button>
+      <button class="btn-utility" id="btnClear" title="Clear Tree">&#10005; Clear</button>
+      <button class="btn-utility" id="btnExportJson" title="Export Tree as JSON">&#128190; JSON</button>
+      <button class="btn-utility" id="btnExportPng" title="Export Tree as PNG Image">&#128247; PNG</button>
+      <button class="btn-utility" id="btnShareUrl" title="Copy Shareable URL">&#128279; Share</button>
+      <button class="theme-toggle-btn" id="themeToggle" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">&#9790;</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace">
+    <!-- Panel Toggle Button (When Collapsed) -->
+    <button class="panel-toggle-trigger" id="panelToggleTrigger" title="Open Operations Panel">
+      &#9776; Operations
+    </button>
+
+    <!-- Left Collapsible Operations Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel">
+      <div class="sidebar-header">
+        <h2 id="sidebarTitle">BST Operations</h2>
+        <button class="collapse-btn" id="collapseBtn" title="Collapse Panel">&#10005;</button>
+      </div>
+
+      <div class="sidebar-content" id="sidebarContent">
+        <!-- ============================================================== -->
+        <!-- BST TAB CONTENT                                                -->
+        <!-- ============================================================== -->
+        <div id="tabContentBST" class="tab-pane active">
+          <!-- Create / Presets -->
+          <div class="op-card">
+            <div class="op-card-title">Create BST</div>
+            <div class="form-row">
+              <input type="number" id="bstRandomN" class="form-input" value="7" min="1" max="25" placeholder="Size n">
+              <button id="btnBSTRandom" class="form-btn">Random</button>
+            </div>
+            <div class="form-row">
+              <input type="text" id="bstCustomArr" class="form-input" placeholder="e.g. 50, 30, 70, 20">
+              <button id="btnBSTCustom" class="form-btn form-btn-secondary">Load</button>
+            </div>
+            <select id="bstPresets" class="form-select">
+              <option value="" disabled selected>Select a Preset BST...</option>
+            </select>
+          </div>
+
+          <!-- Insert & Batch Insert -->
+          <div class="op-card">
+            <div class="op-card-title">Insert</div>
+            <div class="form-row">
+              <input type="text" id="bstInsertVal" class="form-input" placeholder="Value(s) e.g. 45 or 12, 85">
+              <button id="btnBSTInsert" class="form-btn">Insert</button>
+            </div>
+          </div>
+
+          <!-- Search & Remove -->
+          <div class="op-card">
+            <div class="op-card-title">Search &amp; Remove</div>
+            <div class="form-row">
+              <input type="number" id="bstSearchVal" class="form-input" placeholder="Search value">
+              <button id="btnBSTSearch" class="form-btn form-btn-secondary">Search</button>
+            </div>
+            <div class="form-row">
+              <input type="number" id="bstRemoveVal" class="form-input" placeholder="Remove value">
+              <button id="btnBSTRemove" class="form-btn form-btn-secondary" style="color: #f87171;">Remove</button>
+            </div>
+          </div>
+
+          <!-- Extremes: Min / Max -->
+          <div class="op-card">
+            <div class="op-card-title">Min &amp; Max</div>
+            <div class="btn-grid-2">
+              <button id="btnBSTMin" class="form-btn form-btn-secondary">Find Min</button>
+              <button id="btnBSTMax" class="form-btn form-btn-secondary">Find Max</button>
+            </div>
+          </div>
+
+          <!-- Predecessor & Successor -->
+          <div class="op-card">
+            <div class="op-card-title">Predecessor &amp; Successor</div>
+            <div class="form-row">
+              <input type="number" id="bstPredSuccVal" class="form-input" placeholder="Target value">
+            </div>
+            <div class="btn-grid-2">
+              <button id="btnBSTPred" class="form-btn form-btn-secondary">Predecessor</button>
+              <button id="btnBSTSucc" class="form-btn form-btn-secondary">Successor</button>
+            </div>
+          </div>
+
+          <!-- Order Statistics: Rank & Select -->
+          <div class="op-card">
+            <div class="op-card-title">Rank &amp; Select</div>
+            <div class="form-row">
+              <input type="number" id="bstRankVal" class="form-input" placeholder="Value for Rank">
+              <button id="btnBSTRank" class="form-btn form-btn-secondary">Rank</button>
+            </div>
+            <div class="form-row">
+              <input type="number" id="bstSelectK" class="form-input" placeholder="k (1-indexed)" min="1">
+              <button id="btnBSTSelect" class="form-btn form-btn-secondary">Select</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- BINARY TREE TAB CONTENT                                        -->
+        <!-- ============================================================== -->
+        <div id="tabContentBinary" class="tab-pane" style="display: none;">
+          <!-- Create / Presets -->
+          <div class="op-card">
+            <div class="op-card-title">Create Binary Tree</div>
+            <div class="form-row form-row-wrap">
+              <input type="number" id="btRandomN" class="form-input" style="width: 72px; flex: 0 0 72px;" value="6" min="1" max="30" placeholder="Count">
+              <button id="btnBTRandom" class="form-btn" style="flex: 1 1 80px;">Random</button>
+              <div class="segmented-control" id="btLabelTypeToggle" role="radiogroup" aria-label="Label Type">
+                <button type="button" class="segment-btn active" data-type="numbers" role="radio" aria-checked="true" title="Numeric labels (1-99)">
+                  <span class="seg-icon">123</span> Numeric
+                </button>
+                <button type="button" class="segment-btn" data-type="letters" role="radio" aria-checked="false" title="Alphabetic labels (A-Z)">
+                  <span class="seg-icon">ABC</span> Alphabetic
+                </button>
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 10px;">
+              <input type="text" id="btLevelOrderInput" class="form-input" placeholder="e.g. 1, 2, 3, null, 4 or A, B, C, -, D">
+              <button id="btnBTCustom" class="form-btn form-btn-secondary">Load</button>
+            </div>
+            <div id="btLevelOrderHint" class="field-hint" aria-live="polite"></div>
+          </div>
+
+          <!-- Traversals -->
+          <div class="op-card">
+            <div class="op-card-title">Traversals</div>
+            <div class="btn-grid-2">
+              <button id="btnTraversePre" class="form-btn form-btn-secondary">Preorder</button>
+              <button id="btnTraverseIn" class="form-btn form-btn-secondary">Inorder</button>
+              <button id="btnTraversePost" class="form-btn form-btn-secondary">Postorder</button>
+              <button id="btnTraverseLevel" class="form-btn form-btn-secondary">Level Order</button>
+            </div>
+          </div>
+
+          <!-- Live Tree Properties -->
+          <div class="op-card">
+            <div class="op-card-title">Tree Properties</div>
+            <div class="properties-grid" id="propertiesGrid">
+              <div class="prop-card"><span class="prop-label">Leaf Count</span><span class="prop-val" id="propLeaves">0</span></div>
+              <div class="prop-card"><span class="prop-label">Internal Nodes</span><span class="prop-val" id="propInternal">0</span></div>
+              <div class="prop-card"><span class="prop-label">Height</span><span class="prop-val" id="propHeight">0</span></div>
+              <div class="prop-card"><span class="prop-label">Full Tree</span><span class="prop-val" id="propFull">Yes</span></div>
+              <div class="prop-card"><span class="prop-label">Complete</span><span class="prop-val" id="propComplete">Yes</span></div>
+              <div class="prop-card"><span class="prop-label">Perfect</span><span class="prop-val" id="propPerfect">Yes</span></div>
+              <div class="prop-card" style="grid-column: span 2;"><span class="prop-label">Height-Balanced (AVL)</span><span class="prop-val" id="propBalanced">Yes</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- BUILD FROM TRAVERSAL TAB CONTENT                               -->
+        <!-- ============================================================== -->
+        <div id="tabContentBuild" class="tab-pane" style="display: none;">
+          <div class="op-card">
+            <div class="op-card-title">Reconstruction Mode</div>
+            <select id="buildModeSelect" class="form-select" aria-label="Reconstruction Mode">
+              <option value="in+pre">Inorder + Preorder</option>
+              <option value="in+post">Inorder + Postorder</option>
+              <option value="in+level">Inorder + Level Order</option>
+              <option value="pre+post">Preorder + Postorder (Full BT only)</option>
+              <option value="bst-pre">BST from Preorder only</option>
+              <option value="bst-post">BST from Postorder only</option>
+            </select>
+
+            <div id="buildAmbiguityWarning" class="warning-banner" style="display: none;" role="alert">
+              &#9888; <strong>Ambiguity Note:</strong> Preorder + Postorder only uniquely reconstructs <em>Full Binary Trees</em> (where every node has 0 or 2 children). Any single-child node will trigger an ambiguity error.
+            </div>
+
+            <div class="form-group" style="margin-top: 6px;">
+              <label id="buildSeq1Label" for="buildSeq1Input" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Inorder Sequence</label>
+              <input type="text" id="buildSeq1Input" class="form-input" style="width: 100%;" placeholder="e.g. D, B, E, A, C">
+              <div id="buildSeq1Hint" class="field-hint" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group" id="buildSeq2Group" style="margin-top: 6px;">
+              <label id="buildSeq2Label" for="buildSeq2Input" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Postorder Sequence</label>
+              <input type="text" id="buildSeq2Input" class="form-input" style="width: 100%;" placeholder="e.g. D, E, B, C, A">
+              <div id="buildSeq2Hint" class="field-hint" aria-live="polite"></div>
+            </div>
+
+            <!-- Validation & Smart Suggestions Container -->
+            <div id="buildValidationBox" class="validation-card" aria-live="polite"></div>
+
+            <!-- Action Controls Row -->
+            <div class="form-row" style="margin-top: 10px; gap: 6px;">
+              <button id="btnBuildAnimate" class="form-btn" style="flex: 2;">Build &amp; Animate</button>
+              <button id="btnBuildRandom" class="form-btn form-btn-secondary" style="flex: 1;" title="Fill fields with a valid random tree">Random</button>
+            </div>
+
+            <div class="form-row" style="margin-top: 6px; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <label for="buildLabelTypeSelect" style="font-size: 0.72rem; color: var(--text-muted);">Labels:</label>
+                <select id="buildLabelTypeSelect" class="form-select" style="width: auto; padding: 2px 6px; font-size: 0.75rem;">
+                  <option value="letters" selected>Letters A-Z</option>
+                  <option value="numbers">Numbers 1-99</option>
+                </select>
+              </div>
+              <label style="font-size: 0.72rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <input type="checkbox" id="chkBuildImmediate"> Auto-run
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Central SVG Canvas Area -->
+    <section class="canvas-container" id="canvasContainer" role="region" aria-label="Tree Canvas">
+      <!-- N=.., h=.. stats label overlay -->
+      <div class="tree-stats-badge" id="statsBadge" aria-live="polite">N=0, h=0</div>
+
+      <!-- Floating Zoom & Pan Controls -->
+      <div class="canvas-zoom-controls">
+        <button id="btnZoomIn" class="btn-zoom" title="Zoom In" aria-label="Zoom In">+</button>
+        <span id="zoomPercentBadge" class="zoom-badge" aria-label="Current zoom percentage" title="Current Zoom">100%</span>
+        <button id="btnZoomOut" class="btn-zoom" title="Zoom Out" aria-label="Zoom Out">&minus;</button>
+        <button id="btnZoomReset" class="btn-zoom" title="Reset View" aria-label="Reset View">&#8635;</button>
+      </div>
+
+      <!-- Visited sequence banner below tree -->
+      <div class="visited-badge-bar" id="visitedBadgeBar" aria-live="polite">Visited: []</div>
+
+      <!-- Definition Screen Overlay (shown when canvas is empty) -->
+      <div id="emptyCanvasCard" class="empty-canvas-overlay" aria-live="polite">
+        <div class="empty-canvas-content">
+          <h2 id="emptyCardTitle" class="rouge-script-regular empty-card-title">Binary Tree</h2>
+          <p id="emptyCardBody" class="rouge-script-regular empty-card-body">A binary tree is a hierarchical data structure in which every node has at most two children, called the left child and the right child. Formally, it is either empty or consists of a root node together with a left subtree and a right subtree, each of which is itself a binary tree.</p>
+          <div id="emptyCardHint" class="empty-card-hint">Use the panel on the left to create a tree.</div>
+        </div>
+      </div>
+
+      <!-- SVG Tree Viewport -->
+      <svg id="treeCanvas" class="svg-viewport" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Binary Tree Diagram">
+        <g id="viewportTransform">
+          <g id="edgesLayer"></g>
+          <g id="nodesLayer"></g>
+        </g>
+      </svg>
+
+      <!-- Bottom-Right Floating Panels: Yellow Status Box + Pink Pseudocode Box -->
+      <div class="bottom-right-container">
+        <!-- Yellow Status Message Box -->
+        <div class="status-box" id="statusBox" role="status" aria-live="polite">
+          Ready. Welcome to Binary Tree &amp; BST Visualizer.
+        </div>
+
+        <!-- Pink Pseudocode Box -->
+        <div class="pseudocode-panel" id="pseudoPanel">
+          <div class="pseudo-title">Pseudocode</div>
+          <ol class="pseudo-lines" id="pseudoList">
+            <li class="pseudo-line-item" style="list-style-type: none; font-style: italic;">
+              // Pseudocode lines appear here during execution
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Player Bar -->
+  <footer class="player-bar" id="playerBar">
+    <div class="player-controls">
+      <button id="btnSkipStart" class="btn-ctrl" title="Skip to Start (Home)">&#9198;</button>
+      <button id="btnStepBack" class="btn-ctrl" title="Step Back (&larr;)">&#9194;</button>
+      <button id="btnPlay" class="btn-ctrl btn-play" title="Play (Space)">&#9654;</button>
+      <button id="btnStepForward" class="btn-ctrl" title="Step Forward (&rarr;)">&#9193;</button>
+      <button id="btnSkipEnd" class="btn-ctrl" title="Skip to End (End)">&#9197;</button>
+    </div>
+
+    <div class="player-progress-container">
+      <input type="range" id="progressSlider" class="scrubber-slider" min="0" max="0" value="0" step="1" aria-label="Progress">
+      <span class="step-label" id="stepCounter">0 / 0</span>
+    </div>
+
+    <div class="player-speed-container">
+      <label for="speedSelect">Speed</label>
+      <select id="speedSelect" class="speed-select" aria-label="Playback Speed">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="1.0" selected>1.0x</option>
+        <option value="2.0">2.0x</option>
+        <option value="4.0">4.0x</option>
+      </select>
+    </div>
+  </footer>
+
+  <!-- Pyodide Loading & Status Overlay -->
+  <div id="pyodideLoadingOverlay" class="pyodide-overlay" style="display: none;" role="status" aria-live="polite">
+    <div class="pyodide-dialog">
+      <div class="pyodide-spinner"></div>
+      <div id="pyodideLoadingText" class="pyodide-loading-title">Loading Python engine...</div>
+      <div class="pyodide-progress-track">
+        <div id="pyodideProgressBarFill" class="pyodide-progress-fill" style="width: 0%;"></div>
+      </div>
+      <div id="pyodideErrorContainer" class="pyodide-error-box" style="display: none;">
+        <p id="pyodideErrorText"></p>
+        <button id="btnRetryPyodide" class="form-btn" onclick="window.Api.retryPyodide()">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
